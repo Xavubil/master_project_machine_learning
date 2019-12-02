@@ -13,6 +13,9 @@ def importMessprotokoll(path):
         df[curColumn] = df[curColumn].apply(lambda x: x.strip())
     return df
 
+def importAchsleistungCSV(path):
+    return pd.read_csv(path, sep=';')
+
 def importMessDatasetCSV(path):
     return pd.read_csv(path, sep=',', header=6)
 
@@ -20,9 +23,10 @@ def importMessDatasetCSV(path):
 def importJSONExport(path):
     df = pd.read_json(path,orient="records", lines=True)
     df["_id"] = df["_id"].apply(lambda x: x["$oid"])
-    df["timeStamp"] = df["timeStamp"].apply(lambda x: x["$date"]).apply(lambda x: x["$numberLong"])
+    df["timeStamp"] = df["timeStamp"].apply(lambda x: x["$date"]).apply(lambda x: x["$numberLong"]).apply(int)
     df["valueStatus"] = df["valueStatus"].apply(lambda x: x["$numberInt"])
-    df["value_number"] = df["value_number"].apply(lambda x: list(x.values())[0])
+    if "value_number" in df.columns:
+        df["value_number"] = df["value_number"].apply(lambda x: list(x.values())[0])
     df["timeStampMqttClient"] = df["timeStampMqttClient"].apply(lambda x: x["$date"]).apply(lambda x: x["$numberLong"])
     return df
 
@@ -43,4 +47,5 @@ def joinByBinnedTimestampXY(dataframe, timeStampBin=2):
     dfY.rename(columns={"value":"Y"}, inplace=True)
     #join
     joined = dfX.join(dfY, how='inner')
+    joined.reset_index(inplace = True)
     return joined
