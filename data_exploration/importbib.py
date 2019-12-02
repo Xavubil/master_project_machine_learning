@@ -1,6 +1,8 @@
 import pandas as pd
 import ast
 from datetime import datetime
+from pymongo import MongoClient
+import mongodb_connection
 
 def importMessprotokoll(path):
     df = pd.read_csv(path, sep=';')
@@ -49,3 +51,17 @@ def joinByBinnedTimestampXY(dataframe, timeStampBin=2):
     joined = dfX.join(dfY, how='inner')
     joined.reset_index(inplace = True)
     return joined
+
+def loadReibdatenFromMongoDB(tsStart,tsEnd):
+    client = MongoClient(mongodb_connection.connectionstring)
+    db = client.DMG_CELOS_MOBILE_V3_CA
+    collection = db["values_ncprogram"]
+    cursor = collection.find({
+        'timeStamp' : {'$gt':tsStart, '$lt':tsEnd},
+        'toolNo' : 'RA_12H7' # $gt: greater than, $lt: less than
+    })
+    df = pd.DataFrame(columns=['_id','ValueID','value','timeStamp','progName','toolNo'])
+    i = 0
+    for item in cursor:
+        df.loc[i] = [item['_id'],item['ValueID'],item['value_number'],item['timeStamp'], item['progName'],item['toolNo']]
+    return df
