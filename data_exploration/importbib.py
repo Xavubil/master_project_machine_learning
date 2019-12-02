@@ -64,5 +64,8 @@ def loadReibdatenFromMongoDB(tsStart,tsEnd):
     i = 0
     for item in cursor:
         df.loc[i] = [item['_id'],item['ValueID'],item['value_number'],item['timeStamp'], item['progName'],item['toolNo']]
+        if i%10000 == 0:
+            print(i,end=', ')
         i=i+1
+        
     return df
