@@ -59,9 +59,10 @@ def loadReibdatenFromMongoDB(tsStart,tsEnd):
     cursor = collection.find({
         'timeStamp' : {'$gt':tsStart, '$lt':tsEnd},
         'toolNo' : 'RA_12H7' # $gt: greater than, $lt: less than
-    })
+    }).batch_size(10000)
     df = pd.DataFrame(columns=['_id','ValueID','value','timeStamp','progName','toolNo'])
     i = 0
     for item in cursor:
         df.loc[i] = [item['_id'],item['ValueID'],item['value_number'],item['timeStamp'], item['progName'],item['toolNo']]
+        i=i+1
     return df
