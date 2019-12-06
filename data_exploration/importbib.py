@@ -135,12 +135,13 @@ Plotte die Daten der Z-Achse
 Plotte via Matplotlib einen zeitlichen Verlauf der Z-Achse der Maschine in Abhängigkeit der ID
 """
 def plotSpecificIDs(idList, df, tsStart = datetime(2019,11,26,12,0), tsEnd = datetime(2019,11,26,23,35)):
-    plt.figure(figsize=(15, 5), dpi=80)
+    fig = plt.figure(figsize=(15, 5), dpi=80)
     plt.plot(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='r')
     for id in idList:
         plt.scatter(df.loc[lambda l: (l['ValueID']==id) & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']==id) & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "value"], s=1)
     plt.legend(["12430012063.Z1_Axis.Actual_Position_MCS"]+idList)
     plt.show()
+    fig.savefig('Plot_Bilder/plotSpecificIDs.png', dpi=fig.dpi)
     
 """@package docstring
 Plotte die Daten der Z-Achse
@@ -148,11 +149,12 @@ Plotte die Daten der Z-Achse
 Plotte via Matplotlib einen zeitlichen Verlauf der Z-Achse der Maschine
 """
 def plotActualZ1(df, tsStart = datetime(2019,11,26,12,0), tsEnd = datetime(2019,11,26,23,35)):
-    plt.figure(figsize=(15, 5), dpi=80)
+    fig = plt.figure(figsize=(15, 5), dpi=80)
     plt.plot(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='r')
     plt.scatter(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='b',s=1.0)
     plt.legend(["12430012063.Z1_Axis.Actual_Position_MCS","12430012063.Z1_Axis.Actual_Position_MCS"])
     plt.show()
+    fig.savefig('Plot_Bilder/plotActualZ1.png', dpi=fig.dpi)
 
 """@package docstring
 Approximiere Values zwischen minValue und maxValue in bestimmten Zeitintervallen
