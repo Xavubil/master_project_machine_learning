@@ -1,2 +1,3 @@
 data_exploration/.ipynb_checkpoints/
 data_exploration/mongodb_connection.py
+data_exploration/__pycache__/
