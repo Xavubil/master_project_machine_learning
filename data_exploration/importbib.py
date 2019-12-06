@@ -1,8 +1,10 @@
 import pandas as pd
 import ast
-from datetime import datetime
+from datetime import datetime, timedelta
 from pymongo import MongoClient
 import mongodb_connection
+import matplotlib.pyplot as plt
+import copy
 
 def importMessprotokoll(path):
     df = pd.read_csv(path, sep=';')
@@ -69,3 +71,81 @@ def loadReibdatenFromMongoDB(tsStart,tsEnd):
         i=i+1
         
     return df
+
+def loadxAxisDataFromMongoDB(tsStart = datetime(2019,11,26,12,15), tsEnd = datetime(2019,11,26,13,10)):
+    client = MongoClient(mongodb_connection.connectionstring)
+    db = client.DMG_CELOS_MOBILE_V3_CA
+    collection = db["values"]
+    # for a first, get documents between 26.11.2019, 9:30 and 26.11.2019, 23:59
+    # only get documents with ValueID = 12430012063.X1_Axis.Actual_Position_MCS
+    vID = "12430012063.X1_Axis.Actual_Position_MCS"
+    
+    cursor = collection.find({
+            'timeStamp' : {'$gt':tsStart, '$lt':tsEnd} # $gt: greater than, $lt: less than
+            })
+    df = pd.DataFrame(columns=['_id','ValueID','value','timeStamp'])
+    i = 0
+    for item in cursor:
+        df.loc[i] = [item['_id'],item['ValueID'],item['value_number'],item['timeStamp']]
+        i+=1
+        
+    return df
+
+def plotSpecificIDs(idList, df):
+    tsStart = datetime(2019,11,26,12,0)
+    tsEnd = datetime(2019,11,26,23,35)
+    plt.figure(figsize=(15, 5), dpi=80)
+    plt.plot(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='r')
+    for id in idList:
+        plt.scatter(df.loc[lambda l: (l['ValueID']==id) & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']==id) & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "value"], s=1)
+    plt.legend(["12430012063.Z1_Axis.Actual_Position_MCS"]+idList)
+    plt.show()
+    
+def plotActualZ1(df, tsStart = datetime(2019,11,26,12,0), tsEnd = datetime(2019,11,26,23,35)):
+    plt.figure(figsize=(15, 5), dpi=80)
+    plt.plot(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='r')
+    plt.scatter(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='b',s=1.0)
+    plt.legend(["12430012063.Z1_Axis.Actual_Position_MCS","12430012063.Z1_Axis.Actual_Position_MCS"])
+    plt.show()
+
+def approxRange(dfParent,start,end,minValue,maxValue,deltaTime):
+    valueID_Z1 = "12430012063.Z1_Axis.Actual_Position_MCS"
+    newStart = copy.deepcopy(start)
+    newEnd = copy.deepcopy(end)
+    tempDF = dfParent.loc[lambda d: (d["ValueID"] == valueID_Z1) & (start < d["timeStamp"]) & (d["timeStamp"] < end)]
+    
+    #approx. start of frame
+    runAtLeastOnce = False
+    while minValue < tempDF.loc[:,"value"].min() and tempDF.loc[:,"value"].max() < maxValue:
+        newStart = newStart - deltaTime
+        tempDF = dfParent.loc[lambda l: (l["ValueID"] == valueID_Z1) & (newStart < l["timeStamp"]) & (l["timeStamp"] < newEnd)]
+        runAtLeastOnce = True
+    
+    if runAtLeastOnce:
+        newStart = newStart + deltaTime
+    tempDF = dfParent.loc[lambda l: (l["ValueID"] == valueID_Z1) & (newStart < l["timeStamp"]) & (l["timeStamp"] < newEnd)]
+    
+    #approx. end of frame
+    runAtLeastOnce = False
+    while minValue < tempDF.loc[:,"value"].min() and tempDF.loc[:,"value"].max() < maxValue:
+        newEnd = newEnd + deltaTime
+        tempDF = dfParent.loc[lambda l: (l["ValueID"] == valueID_Z1) & (newStart < l["timeStamp"]) & (l["timeStamp"] < newEnd)]
+        runAtLeastOnce = True
+    
+    if runAtLeastOnce:
+        newEnd = newEnd - deltaTime
+    
+    return newStart, newEnd
+
+def approxRangeInSteps(dfParent,initialStart,initialEnd,deltaTimes=[timedelta(minutes=5),timedelta(seconds=30),timedelta(seconds=5),timedelta(seconds=1)],sampleTolerance=5):
+    valueID_Z1 = "12430012063.Z1_Axis.Actual_Position_MCS"
+    start = initialStart
+    end = initialEnd
+    tempDF = dfParent.loc[lambda d: (d["ValueID"] == valueID_Z1) & (start < d["timeStamp"]) & (d["timeStamp"] < end)]
+    minValue = tempDF.loc[:,"value"].min() - sampleTolerance
+    maxValue = tempDF.loc[:,"value"].max() + sampleTolerance
+    print(minValue)
+    print(maxValue)
+    for dT in deltaTimes:
+        start, end = approxRange(dfParent,start,end,minValue,maxValue,dT)
+    return start,end   
