@@ -6,6 +6,11 @@ import mongodb_connection
 import matplotlib.pyplot as plt
 import copy
 
+"""@package docstring
+Import Messprotokoll
+
+Importiere Messprotokolle aus übergebenen Pfad, bereite die Daten auf und speichere sie in einem Panda-Dataframe 
+"""
 def importMessprotokoll(path):
     df = pd.read_csv(path, sep=';')
     df.rename(columns=lambda x: x.strip(), inplace=True)
@@ -17,13 +22,23 @@ def importMessprotokoll(path):
         df[curColumn] = df[curColumn].apply(lambda x: x.strip())
     return df
 
+"""@package docstring
+Import Achsleistungen/Messdaten
+
+Importiere Achsleistungen, Messdaten aus übergebenen Pfad, bereite die Daten auf und speichere sie in einem Panda-Dataframe 
+"""
 def importAchsleistungCSV(path):
     return pd.read_csv(path, sep=';')
 
 def importMessDatasetCSV(path):
     return pd.read_csv(path, sep=',', header=6)
 
-# für Tabelle values und values_actual
+"""@package docstring
+Import JSONExport
+
+Importiere die zuvor exportieren JSON-Dateien und speichere die Spalten "_id", "timeStamp", "valuesStatus", "values_number", und "timeStampMqttClient" in einem Panda-Dataframe
+für Tabelle values und values_actual.
+"""
 def importJSONExport(path):
     df = pd.read_json(path,orient="records", lines=True)
     df["_id"] = df["_id"].apply(lambda x: x["$oid"])
@@ -34,10 +49,20 @@ def importJSONExport(path):
     df["timeStampMqttClient"] = df["timeStampMqttClient"].apply(lambda x: x["$date"]).apply(lambda x: x["$numberLong"])
     return df
 
-# für Tabelle values_ncprogram
+"""@package docstring
+Import JSONExport
+
+Importiere die zuvor exportieren JSON-Dateien und speichere die Spalten "_id", "timeStamp", "valuesStatus", "values_number", und "timeStampMqttClient" in einem Panda-Dataframe
+für Tabelle values_ncprogram
+"""
 def importJSONExportNCProg(path):
     return 0
 
+"""@package docstring
+Join X/Y-Daten via TimeStamp
+
+Führe X- und Y-Koordinaten aus dem values/values_actual-JSON-File über ihre Timestamp zusammen
+"""
 def joinByBinnedTimestampXY(dataframe, timeStampBin=2):
     dfX = dataframe.loc[lambda x: x["ValueID"]=="12430012063.X1_Axis.Actual_Position_MCS", ["ValueID","value","timeStamp"]].sort_values(by=["timeStamp"])
     dfY = dataframe.loc[lambda x: x["ValueID"]=="12430012063.Y1_Axis.Actual_Position_MCS", ["ValueID", "value","timeStamp"]].sort_values(by=["timeStamp"])
@@ -54,6 +79,13 @@ def joinByBinnedTimestampXY(dataframe, timeStampBin=2):
     joined.reset_index(inplace = True)
     return joined
 
+
+"""@package docstring
+Load Reibdaten from Mongo-DB
+
+Hole dir via MongoDB-Client den Datensatz der Reibe im übergebenen Zeitrahmen (tsStart, tsEnd (beides datetime)) und spiele diese in ein Panda-Dataframe und geb dieses Dataframe 
+zurück
+"""
 def loadReibdatenFromMongoDB(tsStart,tsEnd):
     client = MongoClient(mongodb_connection.connectionstring)
     db = client.DMG_CELOS_MOBILE_V3_CA
@@ -72,6 +104,12 @@ def loadReibdatenFromMongoDB(tsStart,tsEnd):
         
     return df
 
+"""@package docstring
+Load x-Axis Data from Mongo-DB
+
+Hole dir via MongoDB-Client den Datensatz der X-Achs-Daten der Maschine im übergebenen Zeitrahmen (tsStart, tsEnd (beides datetime)) und spiele diese in ein Panda-Dataframe 
+und geb dieses Dataframe zurück
+"""
 def loadxAxisDataFromMongoDB(tsStart = datetime(2019,11,26,12,15), tsEnd = datetime(2019,11,26,13,10)):
     client = MongoClient(mongodb_connection.connectionstring)
     db = client.DMG_CELOS_MOBILE_V3_CA
@@ -91,9 +129,12 @@ def loadxAxisDataFromMongoDB(tsStart = datetime(2019,11,26,12,15), tsEnd = datet
         
     return df
 
-def plotSpecificIDs(idList, df):
-    tsStart = datetime(2019,11,26,12,0)
-    tsEnd = datetime(2019,11,26,23,35)
+"""@package docstring
+Plotte die Daten der Z-Achse
+
+Plotte via Matplotlib einen zeitlichen Verlauf der Z-Achse der Maschine in Abhängigkeit der ID
+"""
+def plotSpecificIDs(idList, df, tsStart = datetime(2019,11,26,12,0), tsEnd = datetime(2019,11,26,23,35)):
     plt.figure(figsize=(15, 5), dpi=80)
     plt.plot(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='r')
     for id in idList:
@@ -101,6 +142,11 @@ def plotSpecificIDs(idList, df):
     plt.legend(["12430012063.Z1_Axis.Actual_Position_MCS"]+idList)
     plt.show()
     
+"""@package docstring
+Plotte die Daten der Z-Achse
+
+Plotte via Matplotlib einen zeitlichen Verlauf der Z-Achse der Maschine
+"""
 def plotActualZ1(df, tsStart = datetime(2019,11,26,12,0), tsEnd = datetime(2019,11,26,23,35)):
     plt.figure(figsize=(15, 5), dpi=80)
     plt.plot(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='r')
@@ -108,6 +154,9 @@ def plotActualZ1(df, tsStart = datetime(2019,11,26,12,0), tsEnd = datetime(2019,
     plt.legend(["12430012063.Z1_Axis.Actual_Position_MCS","12430012063.Z1_Axis.Actual_Position_MCS"])
     plt.show()
 
+"""@package docstring
+Approximiere Values zwischen minValue und maxValue in bestimmten Zeitintervallen
+"""
 def approxRange(dfParent,start,end,minValue,maxValue,deltaTime):
     valueID_Z1 = "12430012063.Z1_Axis.Actual_Position_MCS"
     newStart = copy.deepcopy(start)
@@ -137,6 +186,9 @@ def approxRange(dfParent,start,end,minValue,maxValue,deltaTime):
     
     return newStart, newEnd
 
+"""@package docstring
+Approximiere Values zwischen minValue und maxValue in bestimmten Zeitintervallen in unterschiedlichen Schritten
+"""
 def approxRangeInSteps(dfParent,initialStart,initialEnd,deltaTimes=[timedelta(minutes=5),timedelta(seconds=30),timedelta(seconds=5),timedelta(seconds=1)],sampleTolerance=5):
     valueID_Z1 = "12430012063.Z1_Axis.Actual_Position_MCS"
     start = initialStart
