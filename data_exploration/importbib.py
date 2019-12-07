@@ -5,6 +5,7 @@ from pymongo import MongoClient
 import mongodb_connection
 import matplotlib.pyplot as plt
 import copy
+from pandas.plotting import register_matplotlib_converters
 
 """@package docstring
 Import Messprotokoll
@@ -105,19 +106,15 @@ def loadReibdatenFromMongoDB(tsStart,tsEnd):
     return df
 
 """@package docstring
-Load x-Axis Data from Mongo-DB
+Load all Data for a specified from Mongo-DB
 
-Hole dir via MongoDB-Client den Datensatz der X-Achs-Daten der Maschine im übergebenen Zeitrahmen (tsStart, tsEnd (beides datetime)) und spiele diese in ein Panda-Dataframe 
+Hole dir via MongoDB-Client alle Daten der Maschine im übergebenen Zeitrahmen (tsStart, tsEnd (beides datetime)) und spiele diese in ein Panda-Dataframe 
 und geb dieses Dataframe zurück
 """
-def loadxAxisDataFromMongoDB(tsStart = datetime(2019,11,26,12,15), tsEnd = datetime(2019,11,26,13,10)):
+def loadTimeframeFromMongoDB(tsStart = datetime(2019,11,26,12,15), tsEnd = datetime(2019,11,26,13,10)):
     client = MongoClient(mongodb_connection.connectionstring)
     db = client.DMG_CELOS_MOBILE_V3_CA
     collection = db["values"]
-    # for a first, get documents between 26.11.2019, 9:30 and 26.11.2019, 23:59
-    # only get documents with ValueID = 12430012063.X1_Axis.Actual_Position_MCS
-    vID = "12430012063.X1_Axis.Actual_Position_MCS"
-    
     cursor = collection.find({
             'timeStamp' : {'$gt':tsStart, '$lt':tsEnd} # $gt: greater than, $lt: less than
             })
@@ -148,13 +145,15 @@ Plotte die Daten der Z-Achse
 
 Plotte via Matplotlib einen zeitlichen Verlauf der Z-Achse der Maschine
 """
-def plotActualZ1(df, tsStart = datetime(2019,11,26,12,0), tsEnd = datetime(2019,11,26,23,35)):
+def plotActualZ1(df, tsStart = datetime(2019,11,26,12,0), tsEnd = datetime(2019,11,26,23,35), saveFile=True):
+    register_matplotlib_converters()
     fig = plt.figure(figsize=(15, 5), dpi=80)
     plt.plot(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='r')
     plt.scatter(df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp'])& (l['timeStamp'] < tsEnd), "timeStamp"],df.loc[lambda l: (l['ValueID']=="12430012063.Z1_Axis.Actual_Position_MCS") & (tsStart < l['timeStamp']) & (l['timeStamp'] < tsEnd), 'value'], c='b',s=1.0)
     plt.legend(["12430012063.Z1_Axis.Actual_Position_MCS","12430012063.Z1_Axis.Actual_Position_MCS"])
     plt.show()
-    fig.savefig('Plot_Bilder/plotActualZ1.png', dpi=fig.dpi)
+    if saveFile:
+        fig.savefig('Plot_Bilder/plotActualZ1.png', dpi=fig.dpi)
 
 """@package docstring
 Approximiere Values zwischen minValue und maxValue in bestimmten Zeitintervallen
