@@ -197,8 +197,8 @@ def approxRangeInSteps(dfParent,initialStart,initialEnd,deltaTimes=[timedelta(mi
     tempDF = dfParent.loc[lambda d: (d["ValueID"] == valueID_Z1) & (start < d["timeStamp"]) & (d["timeStamp"] < end)]
     minValue = tempDF.loc[:,"value"].min() - sampleTolerance
     maxValue = tempDF.loc[:,"value"].max() + sampleTolerance
-    print(minValue)
-    print(maxValue)
+    print("Min. sampled value: "+str(minValue))
+    print("Max. sampled value: "+str(maxValue))
     for dT in deltaTimes:
         start, end = approxRange(dfParent,start,end,minValue,maxValue,dT)
     return start,end   
