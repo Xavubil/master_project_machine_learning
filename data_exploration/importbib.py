@@ -202,3 +202,19 @@ def approxRangeInSteps(dfParent,initialStart,initialEnd,deltaTimes=[timedelta(mi
     for dT in deltaTimes:
         start, end = approxRange(dfParent,start,end,minValue,maxValue,dT)
     return start,end   
+
+"""@package docstring
+Lade Measurement-Daten aus csv-Datei und baue daraus ein Pandas-Dataframe
+"""
+def importMeasurementData(path='csv_Files/MEAS_PROTOCOL_CSV_E1.CSV'):
+    df = pd.read_csv(path, sep=';')
+    return df
+    
+"""@package docstring
+Lade Achsleistungs-Daten aus csv-Datei und baue daraus ein Pandas-Dataframe
+"""
+def importAchsleistungsData(path='csv_Files/Achsleistung-2019-11-20T10-27-03_E1.csv'):
+    df = pd.read_csv(path, sep=';')
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    return df
+    
