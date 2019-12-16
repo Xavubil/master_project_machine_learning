@@ -208,6 +208,19 @@ Lade Measurement-Daten aus csv-Datei und baue daraus ein Pandas-Dataframe
 """
 def importMeasurementData(path='csv_Files/MEAS_PROTOCOL_CSV_E1.CSV'):
     df = pd.read_csv(path, sep=';')
+    df.rename(columns={'      Date': 'Date', 
+                       '    Time': 'Time', 
+                       '                         Program': 'Program',
+                       ' Workpiece no.': 'Workpiece no.', 
+                       '     Testpoint': 'Testpoint', 
+                       '     Probe no.': 'Probe no.',
+                       '         Cycle': 'Cycle', 
+                       '        S_MVAR': 'S_MVAR', 
+                       '               Measuring variant': 'Measuring variant',
+                       'Results:    ': 'Results', 
+                       '      Setpoint': 'Setpoint', 
+                       '      Measured': 'Measured', 
+                       '    Difference': 'Difference'}, inplace=True)
     return df
     
 """@package docstring
@@ -216,5 +229,14 @@ Lade Achsleistungs-Daten aus csv-Datei und baue daraus ein Pandas-Dataframe
 def importAchsleistungsData(path='csv_Files/Achsleistung-2019-11-20T10-27-03_E1.csv'):
     df = pd.read_csv(path, sep=';')
     df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    return df
+
+"""@package docstring
+Nehme ein Pandas-Dataframe und den Namen einer Spalte, ersetzte die Inhalte der Spalte und gebe das DataFrame zurück
+"""
+def transformStringListToFloatList(df, columnName):
+    list = df[columnName].tolist()
+    list = [float(i.strip().strip("'").replace(',', '.')) for i in list]
+    df[columnName] = list
     return df
     
