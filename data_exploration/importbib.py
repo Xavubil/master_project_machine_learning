@@ -94,7 +94,7 @@ def loadReibdatenFromMongoDB(tsStart,tsEnd):
     cursor = collection.find({
         'timeStamp' : {'$gt':tsStart, '$lt':tsEnd},
         'toolNo' : 'RA_12H7' # $gt: greater than, $lt: less than
-    }).batch_size(10000)
+    }).batch_size(5000)
     df = pd.DataFrame(columns=['_id','ValueID','value','timeStamp','progName','toolNo'])
     i = 0
     for item in cursor:
@@ -111,13 +111,16 @@ Load all Data for a specified from Mongo-DB
 Hole dir via MongoDB-Client alle Daten der Maschine im übergebenen Zeitrahmen (tsStart, tsEnd (beides datetime)) und spiele diese in ein Panda-Dataframe 
 und geb dieses Dataframe zurück
 """
-def loadTimeframeFromMongoDB(tsStart = datetime(2019,11,26,12,15), tsEnd = datetime(2019,11,26,13,10)):
+def loadTimeframeFromMongoDB(tsStart, tsEnd, ValueIDs = None):
     client = MongoClient(mongodb_connection.connectionstring)
     db = client.DMG_CELOS_MOBILE_V3_CA
     collection = db["values"]
-    cursor = collection.find({
-            'timeStamp' : {'$gt':tsStart, '$lt':tsEnd} # $gt: greater than, $lt: less than
-            })
+    query = {}
+    if ValueIDs is None:
+        query = {'timeStamp' : {'$gt':tsStart, '$lt':tsEnd}}
+    else:
+        query = {'timeStamp' : {'$gt':tsStart, '$lt':tsEnd}, 'ValueID' : {'$in' : ValueIDs}}
+    cursor = collection.find(query).batch_size(5000)
     df = pd.DataFrame(columns=['_id','ValueID','value','timeStamp'])
     i = 0
     for item in cursor:
