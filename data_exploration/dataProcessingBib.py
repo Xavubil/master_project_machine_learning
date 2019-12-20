@@ -1,3 +1,6 @@
+from datetime import datetime,timedelta
+import copy
+
 """@package docstring
 Join X/Y-Daten via TimeStamp
 

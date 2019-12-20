@@ -15,6 +15,13 @@ def countInValues(tsStart, tsEnd, ValueIDFilter=None):
     return collection.count_documents(mdbQuery)
     
 
+def countInNCProgram(tsStart, tsEnd):
+    client = MongoClient(mongodb_connection.connectionstring)
+    db = client.DMG_CELOS_MOBILE_V3_CA
+    collection = db["values_ncprogram"]
+    mdbQuery = {'timeStamp' : {'$gt' : tsStart, '$lt' : tsEnd}, 'toolNo' : 'RA_12H7'}
+    return collection.count_documents(mdbQuery)
+
 """@package docstring
 Load Reibdaten of the specified timeframe from Mongo-DB into a dataframe, with columns [_id, ValueID, value, timeStamp, progrName, toolNo]
 
