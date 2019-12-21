@@ -1,0 +1,21 @@
+ebene 1 
+        Achsleistung: 10:27.03 - 11:04.49  37min
+        values:       09:34.30 - 10:04:21  30min
+        Versatz: 1:07h
+        
+ebene 6 
+        Achsleistung: 12:23:24 - 12:50:37  26min
+        values:       12:47.55 - 13:03:40  26min
+        Versatz: 24min
+
+ebene 8
+        Achsleistung: 10:10:09 - 10:37:05 27min
+        values:       10:10:59 - 10:29:45 19min
+        Versatz: 50sec.
+
+ebene 9
+        Achsleistung: 11:03:33 - 11:30:40 27min
+        values:       9:9:22   - 9:19:48 10min
+        Versatz: 1:54h
+
+...
