@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  restserverml:
+    image: ${DOCKER_REGISTRY-}restserverml
+    build:
+      context: .
+      dockerfile: Rest Server ML/Dockerfile
