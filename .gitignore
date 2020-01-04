@@ -7,3 +7,6 @@ model_training/ML.NET/.vs/
 *.csproj.FileListAbsolute.txt
 model_training/ML.NET/ML.NET/obj/
 model_training/ML.NET/ML.NET/bin/
+model_training/ML.NET/Rest Server ML/Rest Server ML/bin/
+model_training/ML.NET/Rest Server ML/Rest Server ML/obj/
+model_training/ML.NET/Rest Server ML/.vs/

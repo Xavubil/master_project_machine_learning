@@ -1,0 +1,31 @@
+Size training: 529
+Size evluation: 119
+PositiveWeight: 0,0997921
+Elapsed time: 00:00:00.2496449
+
+weight 0: -71,6578
+weight 0: 0,33446923
+weight 0: 16,954983
+weight 0: -0,8080537
+weight 0: -0,10013214
+weight 0: 0,5259931
+weight 0: 0,70930785
+weight 0: -3,4047778
+weight 0: -1,3580654
+weight 0: 1,2043831
+weight 0: 3,7292967
+weight 0: -6,1783514
+
+TEST POSITIVE RATIO:	0,9328 (111,0/(111,0+8,0))
+Confusion table
+          ||======================
+PREDICTED || positive | negative | Recall
+TRUTH     ||======================
+ positive ||      100 |       11 | 0,9009
+ negative ||        7 |        1 | 0,1250
+          ||======================
+Precision ||   0,9346 |   0,0833 |
+
+
+Accuracy: 0,8487394957983193
+Logloss: ∞
