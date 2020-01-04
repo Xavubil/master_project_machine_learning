@@ -12,26 +12,33 @@ namespace Rest_Server_ML.Controllers
     [ApiController]
     public class MLController : ControllerBase
     {
-        // GET: api/ML
+        // GET: api/ML    --> train
         [HttpGet]
-        public IEnumerable<string> Get()
+        public string Get()
         {
-            return new string[] { "value1", "value2" };
+            MLClass.train();
+
+            return "trained" ;
         }
 
         // GET: api/ML/5
         [HttpGet("{id}", Name = "Get")]
         public string Get(int id)
         {
-            MLClass.runML();
-
+           
             return "true";
         }
 
-        // POST: api/ML
+        // POST: api/ML    --> predict
         [HttpPost]
-        public void Post([FromBody] string value)
+        public bool Post([FromBody] string value)
         {
+            DataFormat dataToPredict = new DataFormat();
+            dataToPredict.featureVector = new float[] { -1.10201144f, 311.261322f, 180.652863f, 0.5f, 317.466675f, 2f, 1f, 1.75f, 0.8333333f, 86.5f, -303.5181f, 18.0625f };
+            //dataToPredict.label = true;
+
+            return MLClass.predict(dataToPredict);
+
         }
 
         // PUT: api/ML/5

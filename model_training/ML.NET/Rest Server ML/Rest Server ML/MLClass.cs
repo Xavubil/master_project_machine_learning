@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.ML;//Benötigt NuGet-Package Microsoft.ML!
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
+using Microsoft.ML.Transforms;
 
 namespace Rest_Server_ML
 {
@@ -14,10 +15,12 @@ namespace Rest_Server_ML
         public static string currentDir = Path.Combine(Environment.CurrentDirectory, "");
         public static string cacheDir = Path.Combine(currentDir, "cacheDir");
         public static string pathTrainData = Path.Combine(currentDir, "trainingdata.csv");
+        public static string trainedModelPath = Path.Combine(currentDir, "trainedModel.zip");
+
         public static string logPath = Path.Combine(cacheDir, "log.txt");
         public static string evalDatasetPath = Path.Combine(cacheDir, "evalData.txt");
 
-        public static void runML()
+        public static void train()
         {
             MLContext context = new MLContext();
             System.IO.Directory.CreateDirectory(cacheDir);
@@ -85,6 +88,36 @@ namespace Rest_Server_ML
             sw.WriteLine("Logloss: " + evalMetrics.LogLoss);
             sw.Close();
             //Console.ReadLine();
+
+            using (var stream = File.Create(trainedModelPath))
+            {
+                // Saving and loading happens to 'dynamic' models.
+                context.Model.Save(model, traindata.Schema, stream);
+            }
+
+
+           
+
+        }
+
+        public static bool predict(DataFormat dataToPredict)
+        {
+            MLContext context = new MLContext();
+
+            DataViewSchema predSchema;
+
+
+            var stream = File.OpenRead(trainedModelPath);
+            ITransformer predictionPipeline = context.Model.Load(stream, out predSchema);
+
+
+            PredictionEngine<DataFormat, PredictionFormat> predictionEngine = context.Model.CreatePredictionEngine<DataFormat, PredictionFormat>(predictionPipeline);
+
+            PredictionFormat prediction = predictionEngine.Predict(dataToPredict);
+
+
+
+            return prediction.Prediction;
         }
         public static void loadFile(string path, out List<DataFormat> training, out List<DataFormat> evaluation, out float positiveClassWeight)
         {
@@ -155,5 +188,15 @@ namespace Rest_Server_ML
 
         [ColumnName("Label")]
         public bool label { get; set; }
+    }
+
+    public class PredictionFormat
+    {
+        [ColumnName("PredictedLabel")]
+        public bool Prediction { get; set; }
+
+        public float Probability { get; set; }
+
+        public float Score { get; set; }
     }
 }
