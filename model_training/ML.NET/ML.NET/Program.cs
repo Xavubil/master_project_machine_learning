@@ -11,7 +11,7 @@ namespace ML.NET
 {
     class DataFormat
     {
-        [VectorType(12)]
+        [VectorType(10)]
         [ColumnName("Feature")]
         public float[] featureVector { get; set; }
 
@@ -39,13 +39,13 @@ namespace ML.NET
                 line = sr.ReadLine();
                 string[] splitted = line.Split(',');
                 DataFormat df = new DataFormat();
-                float[] featureVector = new float[12];
-                for (int i = 0; i < 12; i++)
+                float[] featureVector = new float[10];
+                for (int i = 0; i < 10; i++)
                 {
                     float.TryParse(splitted[i], System.Globalization.NumberStyles.Any, CultureInfo.GetCultureInfo("en-US"), out featureVector[i]);
                 }
                 df.featureVector = featureVector;
-                df.label = (splitted[14] == "i.O.");
+                df.label = (splitted[10] == "i.O.");
                 if(df.label)
                     pos.Add(df);
                 else
@@ -83,7 +83,7 @@ namespace ML.NET
         
         public static string currentDir = Path.Combine(Environment.CurrentDirectory, "../../../");
         public static string cacheDir = Path.Combine(currentDir, "cacheDir");
-        public static string pathTrainData = Path.Combine(currentDir, "trainingdata.csv");
+        public static string pathTrainData = Path.Combine(currentDir, "processed_trainingdata.csv");
         public static string logPath = Path.Combine(cacheDir, "log.txt");
         public static string evalDatasetPath = Path.Combine(cacheDir, "evalData.txt");
 
