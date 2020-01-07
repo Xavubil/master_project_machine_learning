@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -31,14 +32,23 @@ namespace Rest_Server_ML.Controllers
 
         // POST: api/ML    --> predict
         [HttpPost]
-        public bool Post([FromBody] string value)
+        public bool Post([FromBody] string values)
         {
+            values.Replace(" ", "");
+            string[] stringArray = values.Split(',');
+
+            float[] floatArray = new float[stringArray.Length];
+
+
+            for (int count = 0; count < stringArray.Length; count++)
+            {
+                floatArray[count] = float.Parse(stringArray[count], CultureInfo.InvariantCulture.NumberFormat);
+            }
+
             DataFormat dataToPredict = new DataFormat();
-            dataToPredict.featureVector = new float[] { -1.10201144f, 311.261322f, 180.652863f, 0.5f, 317.466675f, 2f, 1f, 1.75f, 0.8333333f, 86.5f, -303.5181f, 18.0625f };
-            //dataToPredict.label = true;
+            dataToPredict.featureVector = floatArray;
 
             return MLClass.predict(dataToPredict);
-
         }
 
         // PUT: api/ML/5
