@@ -1,0 +1,20 @@
+Size training: 1119
+Size evluation: 258
+PositiveWeight: 0,2474916
+Elapsed time: 00:00:00.7410940
+
+
+TEST POSITIVE RATIO:	0,8178 (211,0/(211,0+47,0))
+Confusion table
+          ||======================
+PREDICTED || positive | negative | Recall
+TRUTH     ||======================
+ positive ||      180 |       31 | 0,8531
+ negative ||       12 |       35 | 0,7447
+          ||======================
+Precision ||   0,9375 |   0,5303 |
+
+
+Accuracy: 	0,833333333333333
+F1Score:  	0,893300248138958
+LogLoss:  	0,448608727749644

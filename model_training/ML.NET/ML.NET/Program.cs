@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.ML;//Benötigt NuGet-Package Microsoft.ML!
 using Microsoft.ML.Data;
 using Microsoft.ML.Trainers;
+using Microsoft.ML.Trainers.LightGbm;
 
 namespace ML.NET
 {
@@ -84,7 +85,7 @@ namespace ML.NET
         public static string currentDir = Path.Combine(Environment.CurrentDirectory, "../../../");
         public static string cacheDir = Path.Combine(currentDir, "cacheDir");
         public static string pathTrainData = Path.Combine(currentDir, "processed_trainingdata.csv");
-        public static string logPath = Path.Combine(cacheDir, "log.txt");
+        public static string logPath = Path.Combine(cacheDir, "LightGBM_log.txt");
         public static string evalDatasetPath = Path.Combine(cacheDir, "evalData.txt");
 
         static void Main(string[] args)
@@ -112,8 +113,23 @@ namespace ML.NET
                 LearningRate = 0.01,
                 PositiveInstanceWeight = positiveWeight
             };
+            var sdcaOptions = new SdcaLogisticRegressionBinaryTrainer.Options()
+            {
+                LabelColumnName = "Label",
+                FeatureColumnName = "Feature",
+                MaximumNumberOfIterations = 50,
+                BiasLearningRate = 0.01f,
+                PositiveInstanceWeight = positiveWeight
+            };
+            var lgbmOptions = new LightGbmBinaryTrainer.Options()
+            {
+                LabelColumnName = "Label",
+                FeatureColumnName = "Feature",
+                LearningRate = 0.01,
+                WeightOfPositiveExamples = positiveWeight
+            };
 
-            var pipeline = context.BinaryClassification.Trainers.SgdCalibrated(options);
+            var pipeline = context.BinaryClassification.Trainers.LightGbm(lgbmOptions);// SdcaLogisticRegression(sdcaOptions);// SgdCalibrated(options);
 
             Console.WriteLine("Start training...");
             Stopwatch watch = new Stopwatch();
@@ -124,37 +140,24 @@ namespace ML.NET
             sw.WriteLine("Elapsed time: " + watch.Elapsed.ToString());
             sw.WriteLine();
             int i = 0;
-            foreach(var weight in model.Model.SubModel.Weights)
+            /*foreach(var weight in model.Model.SubModel.Weights)
             {
                 sw.WriteLine("weight " + i + ": " + weight);
-            }
+                i++;
+            }*/
 
             IDataView transformedEval = model.Transform(evalData);
-            /*var cursor = transformedEval.GetRowCursor(transformedEval.Schema);
-            cursor.MoveNext();
-            StreamWriter swEvalData = new StreamWriter(evalDatasetPath);
-            foreach(var col in cursor.Schema)
-            {
-                swEvalData.Write(col.Name + "\t");
-            }
-            swEvalData.WriteLine();
-            do
-            {
-                swEvalData.WriteLine(cursor.ToString());
-            } while (cursor.MoveNext());
-            swEvalData.Close();*/
+            
             var evalMetrics = context.BinaryClassification.Evaluate(transformedEval);
 
             sw.WriteLine();
             sw.WriteLine(evalMetrics.ConfusionMatrix.GetFormattedConfusionTable());
             sw.WriteLine();
 
-            Console.WriteLine("Accuracy: " + evalMetrics.Accuracy);
-            sw.WriteLine("Accuracy: " + evalMetrics.Accuracy);
-            Console.WriteLine("LogLoss: " + evalMetrics.LogLoss);
-            sw.WriteLine("Logloss: " + evalMetrics.LogLoss);
+            sw.WriteLine("Accuracy: \t" + evalMetrics.Accuracy);
+            sw.WriteLine("F1Score:  \t" + evalMetrics.F1Score);
+            sw.WriteLine("LogLoss:  \t" + evalMetrics.LogLoss);
             sw.Close();
-            Console.ReadLine();
         }
     }
 }
