@@ -17,17 +17,41 @@ namespace Rest_Server_ML.Controllers
         [HttpGet]
         public string Get()
         {
-            MLClass.train();
-
-            return "trained" ;
+            
+            return "insert ID" ;
         }
 
         // GET: api/ML/5
         [HttpGet("{id}", Name = "Get")]
         public string Get(int id)
         {
-           
-            return "true";
+            string returnstring = "";
+
+            switch (id)
+            {
+                
+                case 1:
+                    returnstring = MLClass.trainSGD();
+                    break;
+
+                case 2:
+                    returnstring = MLClass.trainFastTree();
+                    break;
+                case 3:
+                    returnstring = MLClass.trainSDCA();
+                    break;
+                case 4:
+                    returnstring = MLClass.trainLightGBM();
+                    break;
+
+                default:
+                    returnstring = "insert ID in Request --> 1. SGD, 2. Fast Tree, 3. SDCA, 4. Light GBM";
+                    break;
+
+            }
+            
+
+            return returnstring;
         }
 
         // POST: api/ML    --> predict
